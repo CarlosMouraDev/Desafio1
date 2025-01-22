@@ -31,3 +31,6 @@ replay_pid*
 
 # Intellij
 *.idea
+
+# DataBase
+*/META-INF/*
