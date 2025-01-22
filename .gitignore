@@ -28,3 +28,7 @@ replay_pid*
 
 # Target folder
 /target
+
+# Intellij
+
+.idea
