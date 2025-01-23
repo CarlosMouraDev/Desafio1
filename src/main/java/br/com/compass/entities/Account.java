@@ -1,19 +1,18 @@
 package br.com.compass.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
+@Table(name = "account")
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String name;
     private String phone;
     private String email;
@@ -33,9 +32,7 @@ public class Account {
         this.balance = 0;
     }
 
-    public double getBalance() {
-        return balance;
-    }
+
 
     public void increaseBalance(double quantity) {
         if (quantity > 0) {
@@ -43,8 +40,16 @@ public class Account {
         }
     }
 
+    public double getBalance() {
+        return balance;
+    }
+
     public void decreaseBalance(double quantity) {
         this.balance -= quantity;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getEmail() {
@@ -65,5 +70,20 @@ public class Account {
 
     public String getCpf() {
         return cpf;
+    }
+
+    public LocalDate getBirth() {
+        return birth;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Account account)) return false;
+        return Objects.equals(id, account.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

@@ -2,6 +2,7 @@ package br.com.compass;
 
 import br.com.compass.entities.Account;
 import br.com.compass.repositories.AccountRepository;
+import br.com.compass.repositories.TransactionRepository;
 import br.com.compass.services.BankService;
 import br.com.compass.services.exceptions.BankServiceException;
 import jakarta.persistence.EntityManager;
@@ -23,6 +24,8 @@ public class App {
         EntityManager em = getEntityManager();
 
         AccountRepository accountRepository = new AccountRepository(em);
+        TransactionRepository transactionRepository = new TransactionRepository(em);
+        BankService bankService = new BankService(accountRepository, transactionRepository);
 
         mainMenu(scanner);
         
@@ -150,7 +153,8 @@ public class App {
 
             EntityManager em = getEntityManager();
             AccountRepository accountRepository = new AccountRepository(em);
-            BankService bankService = new BankService(accountRepository);
+            TransactionRepository transactionRepository = new TransactionRepository(em);
+            BankService bankService = new BankService(accountRepository, transactionRepository);
 
             switch (option) {
                 case "1":
@@ -167,7 +171,7 @@ public class App {
                                 System.out.println("Digite um valor maior que zero.");
                                 continue;
                             }
-                            bankService.deposit(loggedUser, Float.parseFloat(inp));
+                            bankService.deposit(loggedUser, Double.parseDouble(inp));
                             break;
                         } catch (NumberFormatException e) {
                             System.out.println("Entrada inválida! Certifique-se de digitar apenas números.");
@@ -198,7 +202,7 @@ public class App {
                     }
                     break;
                 case "3":
-                    System.out.println("Seu saldo: " + accountRepository.findByEmail(loggedUser).getBalance());
+                    System.out.println("Balance: " + accountRepository.findByEmail(loggedUser).getBalance());
                     break;
                 case "4":
                     // ToDo...
