@@ -2,10 +2,14 @@ package br.com.compass;
 
 import br.com.compass.entities.Account;
 import br.com.compass.repositories.AccountRepository;
+import br.com.compass.services.BankService;
+import br.com.compass.services.exceptions.BankServiceException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -15,11 +19,10 @@ import java.util.regex.Pattern;
 public class App {
     
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
         EntityManager em = getEntityManager();
 
         AccountRepository accountRepository = new AccountRepository(em);
-
-        Scanner scanner = new Scanner(System.in);
 
         mainMenu(scanner);
         
@@ -27,6 +30,8 @@ public class App {
         em.close();
         System.out.println("Application closed");
     }
+
+    private static String loggedUser = "";
 
     public static void mainMenu(Scanner scanner) {
         boolean running = true;
@@ -48,6 +53,7 @@ public class App {
                     System.out.print("Senha: ");
                     String passwordLogin = scanner.next();
                     if (AccountRepository.accountExists(emailLogin, passwordLogin)) {
+                        loggedUser = emailLogin;
                         bankMenu(scanner);
                     } else {
                         System.out.println("Usuário inválido!");
@@ -96,7 +102,7 @@ public class App {
                         Matcher matcher = pattern.matcher(birth);
 
                         if (!matcher.matches()) {
-                            System.out.println("Formato inválido! Por favor, insira a data no formato DD/MM/YYYY.");
+                            System.out.println("Formato inválido! Por favor, insira a data no formato (DD/MM/YYYY).");
                             continue;
                         }
                         break;
@@ -123,11 +129,6 @@ public class App {
         }
     }
 
-    private static EntityManager getEntityManager() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("BankPU");
-        return emf.createEntityManager();
-    }
-
     public static void bankMenu(Scanner scanner) {
         boolean running = true;
 
@@ -138,35 +139,80 @@ public class App {
             System.out.println("|| 3. Check Balance        ||");
             System.out.println("|| 4. Transfer             ||");
             System.out.println("|| 5. Bank Statement       ||");
+            System.out.println("|| 6. Logout               ||");
             System.out.println("|| 0. Exit                 ||");
             System.out.println("=============================");
             System.out.print("Choose an option: ");
 
-            int option = scanner.nextInt();
+            String option = scanner.next();
+            DecimalFormat df = new DecimalFormat("0.00");
+            double value = 0;
+
+            EntityManager em = getEntityManager();
+            AccountRepository accountRepository = new AccountRepository(em);
+            BankService bankService = new BankService(accountRepository);
 
             switch (option) {
-                case 1:
-                    // ToDo...
-                    System.out.println("Deposit.");
+                case "1":
+                    while (true) {
+                        System.out.print("Digite o valor do depósito, ou digite (c) para cancelar: R$");
+                        String inp = scanner.next();
+                        if (inp.equals("c")) {
+                            break;
+                        }
+                        inp = inp.replace(",", ".");
+                        try {
+                            value = Double.parseDouble(inp);
+                            if (value <= 0) {
+                                System.out.println("Digite um valor maior que zero.");
+                                continue;
+                            }
+                            bankService.deposit(loggedUser, Float.parseFloat(inp));
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida! Certifique-se de digitar apenas números.");
+                        }
+                    }
                     break;
-                case 2:
-                    // ToDo...
-                    System.out.println("Withdraw.");
+                case "2":
+                    while (true) {
+                        System.out.print("Digite o valor de saque, ou digite (c) para cancelar: R$");
+                        String inp = scanner.next();
+                        if (inp.equals("c")) {
+                            break;
+                        }
+                        inp = inp.replace(",", ".");
+                        try {
+                            value = Double.parseDouble(inp);
+                            if (value <= 0) {
+                                System.out.println("Digite um valor maior que zero.");
+                                continue;
+                            }
+                            bankService.withdraw(loggedUser, Float.parseFloat(inp));
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida! Certifique-se de digitar apenas números.");
+                        } catch (BankServiceException e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
                     break;
-                case 3:
-                    // ToDo...
-                    System.out.println("Check Balance.");
+                case "3":
+                    System.out.println("Seu saldo: " + accountRepository.findByEmail(loggedUser).getBalance());
                     break;
-                case 4:
+                case "4":
                     // ToDo...
                     System.out.println("Transfer.");
                     break;
-                case 5:
+                case "5":
                     // ToDo...
                     System.out.println("Bank Statement.");
                     break;
-                case 0:
-                    // ToDo...
+                case "6":
+                    loggedUser = "";
+                    mainMenu(scanner);
+                    return;
+                case "0":
                     System.out.println("Exiting...");
                     running = false;
                     return;
@@ -174,5 +220,10 @@ public class App {
                     System.out.println("Invalid option! Please try again.");
             }
         }
+    }
+
+    private static EntityManager getEntityManager() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("BankPU");
+        return emf.createEntityManager();
     }
 }
