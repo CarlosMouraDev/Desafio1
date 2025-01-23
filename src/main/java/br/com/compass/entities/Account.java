@@ -44,9 +44,7 @@ public class Account {
     }
 
     public void decreaseBalance(double quantity) {
-        if (quantity > this.balance) {
-            this.balance -= quantity;
-        }
+        this.balance -= quantity;
     }
 
     public String getEmail() {

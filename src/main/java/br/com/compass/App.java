@@ -2,10 +2,14 @@ package br.com.compass;
 
 import br.com.compass.entities.Account;
 import br.com.compass.repositories.AccountRepository;
+import br.com.compass.services.BankService;
+import br.com.compass.services.exceptions.BankServiceException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -125,11 +129,6 @@ public class App {
         }
     }
 
-    private static EntityManager getEntityManager() {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("BankPU");
-        return emf.createEntityManager();
-    }
-
     public static void bankMenu(Scanner scanner) {
         boolean running = true;
 
@@ -146,19 +145,60 @@ public class App {
             System.out.print("Choose an option: ");
 
             String option = scanner.next();
+            DecimalFormat df = new DecimalFormat("0.00");
+            double value = 0;
+
+            EntityManager em = getEntityManager();
+            AccountRepository accountRepository = new AccountRepository(em);
+            BankService bankService = new BankService(accountRepository);
 
             switch (option) {
                 case "1":
-                    // ToDo...
-                    System.out.println("Deposit.");
+                    while (true) {
+                        System.out.print("Digite o valor do depósito, ou digite (c) para cancelar: R$");
+                        String inp = scanner.next();
+                        if (inp.equals("c")) {
+                            break;
+                        }
+                        inp = inp.replace(",", ".");
+                        try {
+                            value = Double.parseDouble(inp);
+                            if (value <= 0) {
+                                System.out.println("Digite um valor maior que zero.");
+                                continue;
+                            }
+                            bankService.deposit(loggedUser, Float.parseFloat(inp));
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida! Certifique-se de digitar apenas números.");
+                        }
+                    }
                     break;
                 case "2":
-                    // ToDo...
-                    System.out.println("Withdraw.");
+                    while (true) {
+                        System.out.print("Digite o valor de saque, ou digite (c) para cancelar: R$");
+                        String inp = scanner.next();
+                        if (inp.equals("c")) {
+                            break;
+                        }
+                        inp = inp.replace(",", ".");
+                        try {
+                            value = Double.parseDouble(inp);
+                            if (value <= 0) {
+                                System.out.println("Digite um valor maior que zero.");
+                                continue;
+                            }
+                            bankService.withdraw(loggedUser, Float.parseFloat(inp));
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida! Certifique-se de digitar apenas números.");
+                        } catch (BankServiceException e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
                     break;
                 case "3":
-                    // ToDo...
-                    System.out.println("Check Balance.");
+                    System.out.println("Seu saldo: " + accountRepository.findByEmail(loggedUser).getBalance());
                     break;
                 case "4":
                     // ToDo...
@@ -173,7 +213,6 @@ public class App {
                     mainMenu(scanner);
                     return;
                 case "0":
-                    loggedUser = "";
                     System.out.println("Exiting...");
                     running = false;
                     return;
@@ -181,5 +220,10 @@ public class App {
                     System.out.println("Invalid option! Please try again.");
             }
         }
+    }
+
+    private static EntityManager getEntityManager() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("BankPU");
+        return emf.createEntityManager();
     }
 }

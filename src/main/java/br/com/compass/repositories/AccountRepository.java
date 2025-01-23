@@ -3,6 +3,7 @@ package br.com.compass.repositories;
 import br.com.compass.entities.Account;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 public class AccountRepository {
 
@@ -35,5 +36,22 @@ public class AccountRepository {
         query.setParameter("email", email);
 
         return !query.getResultList().isEmpty();
+    }
+
+    public void update(Account account) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(account);
+        entityManager.getTransaction().commit();
+    }
+
+    public Account findByEmail(String email) {
+        try {
+            TypedQuery<Account> query = entityManager.createQuery(
+                    "SELECT u FROM Account u WHERE u.email = :email", Account.class);
+            query.setParameter("email", email);
+            return query.getSingleResult();
+        } catch (jakarta.persistence.NoResultException e) {
+            return null;
+        }
     }
 }
