@@ -13,12 +13,11 @@ public class AccountRepository {
         AccountRepository.entityManager = entityManager;
     }
 
-    public static boolean accountExists(String email, String senha) {
-        String jpql = "SELECT u FROM Account u WHERE u.email = :email AND u.password = :senha";
+    public static boolean accountExists(String email, String password) {
+        String jpql = "SELECT u FROM Account u WHERE u.email = :email AND u.password = :password";
         Query query = entityManager.createQuery(jpql);
         query.setParameter("email", email);
-        query.setParameter("senha", senha);
-
+        query.setParameter("password", password);
         return !query.getResultList().isEmpty();
     }
 

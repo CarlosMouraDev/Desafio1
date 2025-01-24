@@ -1,9 +1,7 @@
 package br.com.compass.entities;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -22,6 +20,7 @@ public class Account {
     private double balance;
 
     public Account() {}
+
     public Account(String name, String phone, String email, String cpf, String password, LocalDate birth) {
         this.name = name;
         this.phone = phone;
@@ -31,8 +30,6 @@ public class Account {
         this.password = password;
         this.balance = 0;
     }
-
-
 
     public void increaseBalance(double quantity) {
         if (quantity > 0) {
@@ -48,6 +45,7 @@ public class Account {
         this.balance -= quantity;
     }
 
+    // Getters para os atributos
     public Long getId() {
         return id;
     }
@@ -75,15 +73,16 @@ public class Account {
     public LocalDate getBirth() {
         return birth;
     }
-
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Account account)) return false;
-        return Objects.equals(id, account.id);
+        if (this == o) return true; // Verifica se é o mesmo objeto
+        if (o == null || getClass() != o.getClass()) return false; // Verifica se não é nulo e se são da mesma classe
+        Account account = (Account) o;
+        return Objects.equals(id, account.id); // Compara os IDs das contas
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id); // Gera um hash baseado no ID
     }
 }

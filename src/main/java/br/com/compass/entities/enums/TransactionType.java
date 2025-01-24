@@ -1,7 +1,7 @@
 package br.com.compass.entities.enums;
 
 public enum TransactionType {
-    WITHDRAWAL,
+    WITHDRAW,
     DEPOSIT,
     RECEIVED_TRANSFER,
     SENT_TRANSFER;
