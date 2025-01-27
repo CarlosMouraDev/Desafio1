@@ -21,7 +21,8 @@ public class BankService {
     }
 
     public void deposit(String email, double amount)  {
-        Account account = accountRepository.findByEmail(email);
+        Account account = AccountRepository.findByEmail(email);
+        assert account != null;
         account.increaseBalance(amount);
         Transaction transaction = new Transaction();
         transaction.setOriginAccount(account);
@@ -33,7 +34,8 @@ public class BankService {
     }
 
     public void withdraw(String email, double amount)  throws BankServiceException {
-        Account account = accountRepository.findByEmail(email);
+        Account account = AccountRepository.findByEmail(email);
+        assert account != null;
         if (account.getBalance() < amount) {
             throw new BankServiceException("Insufficient funds.");
         }
@@ -64,13 +66,14 @@ public class BankService {
     }
 
     public void transfer(String recipient, String receiver, double amount) throws BankServiceException {
-        Account account1 = accountRepository.findByEmail(recipient);
-        Account account2 = accountRepository.findByEmail(receiver);
+        Account account1 = AccountRepository.findByEmail(recipient);
+        Account account2 = AccountRepository.findByEmail(receiver);
 
         if (account2 == null) {
             throw new BankServiceException("Account not found.");
         }
 
+        assert account1 != null;
         if (account1.getBalance() < amount) {
             throw new BankServiceException("Insufficient funds.");
         }

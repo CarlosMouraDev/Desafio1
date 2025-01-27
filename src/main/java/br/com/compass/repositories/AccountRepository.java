@@ -22,14 +22,6 @@ public class AccountRepository {
         return !query.getResultList().isEmpty();
     }
 
-    public static boolean cpfExists(String cpf) {
-        String jpql = "SELECT u FROM Account u WHERE u.cpf = :cpf";
-        Query query = entityManager.createQuery(jpql);
-        query.setParameter("cpf", cpf);
-
-        return !query.getResultList().isEmpty();
-    }
-
     public static boolean emailExists(String email) {
         String jpql = "SELECT u FROM Account u WHERE u.email = :email";
         Query query = entityManager.createQuery(jpql);
