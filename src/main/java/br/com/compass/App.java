@@ -2,6 +2,7 @@ package br.com.compass;
 
 import br.com.compass.entities.Account;
 import br.com.compass.entities.Transaction;
+import br.com.compass.entities.enums.AccountType;
 import br.com.compass.repositories.AccountRepository;
 import br.com.compass.repositories.TransactionRepository;
 import br.com.compass.services.BankService;
@@ -75,6 +76,9 @@ public class App {
                         if (AccountRepository.emailExists(email)) {
                             System.out.println("Email already in use!");
                             continue;
+                        } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                            System.out.println("Invalid email!");
+                            continue;
                         }
                         break;
                     }
@@ -84,10 +88,10 @@ public class App {
 
                     String cpf;
                     while (true) {
-                        System.out.print("Enter your CPF: ");
+                        System.out.print("Enter your CPF (only numbers): ");
                         cpf = scanner.next();
 
-                        if (AccountRepository.cpfExists(cpf)) {
+                        if (AccountRepository.cpfExists(cpf) || !cpf.matches("^\\d{11}$")) {
                             System.out.println("Invalid CPF!");
                             continue;
                         }
@@ -112,8 +116,49 @@ public class App {
                     }
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                     LocalDate birthDate = LocalDate.parse(birth, formatter);
-
-                    Account account = new Account(name, phone, email, cpf, password, birthDate);
+                    AccountType type = null;
+                    while (true) {
+                        System.out.print("Choose your account type: ");
+                        System.out.println("========== Account type =========");
+                        System.out.println("|| 1. Checking                 ||");
+                        System.out.println("|| 2. Saving                   ||");
+                        System.out.println("|| 3. Payroll                  ||");
+                        System.out.println("|| 4. Student                  ||");
+                        System.out.println("|| 5. Business                 ||");
+                        System.out.println("|| 6. Cancel Account Creation  ||");
+                        System.out.println("=================================");
+                        System.out.print("Choose an option: ");
+                        String opt = scanner.next();
+                        switch (opt) {
+                            case "1":
+                                type = AccountType.CHECKING;
+                                break;
+                            case "2":
+                                type = AccountType.SAVING;
+                                break;
+                            case "3":
+                                type = AccountType.PAYROLL;
+                                break;
+                            case "4":
+                                type = AccountType.STUDENT;
+                                break;
+                            case "5":
+                                type = AccountType.BUSINESS;
+                                break;
+                            case "6":
+                                return;
+                            default: 
+                                System.out.println("Invalid option!");
+                                break;
+                        }
+                        if (AccountRepository.accountCpfTypeExists(cpf, type)) {
+                            System.out.println("There's already a account with this type associated with that CPF number!");
+                            continue;
+                        }
+                        break;
+                    }
+                    
+                    Account account = new Account(name, phone, email, cpf, password, birthDate, type);
 
                     EntityManager em = getEntityManager();
                     em.getTransaction().begin();
@@ -205,7 +250,6 @@ public class App {
                     System.out.println("Balance: " + String.format("%.2f", accountRepository.findByEmail(loggedUser).getBalance()));
                     break;
                 case "4":
-
                     System.out.print("Enter the amount, or type (c) to cancel: R$");
                     String inp = scanner.next();
                     if (inp.equals("c")) {

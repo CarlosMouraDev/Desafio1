@@ -1,6 +1,7 @@
 package br.com.compass.repositories;
 
 import br.com.compass.entities.Account;
+import br.com.compass.entities.enums.AccountType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -53,4 +54,15 @@ public class AccountRepository {
             return null;
         }
     }
+
+    public static boolean accountCpfTypeExists(String cpf, AccountType accountType) {
+        String jpql = "SELECT COUNT(a) FROM Account a WHERE a.cpf = :cpf AND a.accountType = :accountType";
+        TypedQuery<Long> query = entityManager.createQuery(jpql, Long.class);
+        query.setParameter("cpf", cpf);
+        query.setParameter("accountType", accountType);
+
+        Long count = query.getSingleResult();
+        return count > 0;
+    }
+
 }

@@ -1,5 +1,6 @@
 package br.com.compass.entities;
 
+import br.com.compass.entities.enums.AccountType;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -11,17 +12,27 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private String phone;
+
     private String email;
+
     private String cpf;
+
     private String password;
+
     private LocalDate birth;
+
     private double balance;
+
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType;
 
     public Account() {}
 
-    public Account(String name, String phone, String email, String cpf, String password, LocalDate birth) {
+    public Account(String name, String phone, String email, String cpf, String password, LocalDate birth, AccountType accountType) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -29,6 +40,7 @@ public class Account {
         this.birth = birth;
         this.password = password;
         this.balance = 0;
+        this.accountType = accountType;
     }
 
     public void increaseBalance(double quantity) {
@@ -45,7 +57,6 @@ public class Account {
         this.balance -= quantity;
     }
 
-    // Getters para os atributos
     public Long getId() {
         return id;
     }
@@ -70,19 +81,23 @@ public class Account {
         return cpf;
     }
 
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
     public LocalDate getBirth() {
         return birth;
     }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true; // Verifica se é o mesmo objeto
-        if (o == null || getClass() != o.getClass()) return false; // Verifica se não é nulo e se são da mesma classe
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(id, account.id); // Compara os IDs das contas
+        return Objects.equals(id, account.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id); // Gera um hash baseado no ID
+        return Objects.hash(id);
     }
 }
