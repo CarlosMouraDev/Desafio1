@@ -44,7 +44,7 @@ public class AccountRepository {
         entityManager.getTransaction().commit();
     }
 
-    public Account findByEmail(String email) {
+    public static Account findByEmail(String email) {
         try {
             TypedQuery<Account> query = entityManager.createQuery(
                     "SELECT u FROM Account u WHERE u.email = :email", Account.class);
